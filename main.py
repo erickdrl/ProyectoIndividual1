@@ -3,6 +3,10 @@ import pandas as pd
 from datetime import datetime
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.neighbors import NearestNeighbors
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
 
 df=pd.read_csv('Movies.csv')
 df2=pd.read_csv('Crew.csv')
