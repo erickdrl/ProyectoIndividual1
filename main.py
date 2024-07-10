@@ -191,30 +191,30 @@ def fetch_director(director: str):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-df_to_use = df[['title', 'vote_average']]
-df_used = df_to_use.sample(n=1500, random_state=42)
+df_to_use=df[['title', 'vote_average']]
+df_used=df_to_use.sample(n=1500, random_state=42)
 
-scaler = MinMaxScaler()
-df_used['vote_average_normalized'] = scaler.fit_transform(df_used[['vote_average']])
+scaler=MinMaxScaler()
+df_used['vote_average_normalized']=scaler.fit_transform(df_used[['vote_average']])
 
-tfidf_vectorizer = TfidfVectorizer(stop_words='english')
-tfidf_matrix = tfidf_vectorizer.fit_transform(df_used['title'])
+tfidf_vectorizer=TfidfVectorizer(stop_words='english')
+tfidf_matrix=tfidf_vectorizer.fit_transform(df_used['title'])
 
-knn_model = NearestNeighbors(n_neighbors=6, algorithm='auto').fit(tfidf_matrix)
+knn_model=NearestNeighbors(n_neighbors=6, algorithm='auto').fit(tfidf_matrix)
 
 def recomendacion(movie, model, tfidf_matrix, df_sample, num=5):
-    vectorized_movie = tfidf_vectorizer.transform([movie])
-    d, i = model.kneighbors(vectorized_movie, n_neighbors=num + 1)
-    recom = df_sample.iloc[i[0][1:num + 1]].copy()
+    vectorized_movie=tfidf_vectorizer.transform([movie])
+    d, i=model.kneighbors(vectorized_movie, n_neighbors=num + 1)
+    recom=df_sample.iloc[i[0][1:num +1]].copy()
     return recom[['title', 'vote_average', 'vote_average_normalized']]
 
 class MovieRequest(BaseModel):
     title: str
 
-@app.post("/recommendations/")
+@app.post("/recommendacion/")
 async def get_recommendations(movie: MovieRequest):
     try:
-        recommendations = recomendacion(movie.title, knn_model, tfidf_matrix, df_used)
+        recommendations=recomendacion(movie.title, knn_model, tfidf_matrix, df_used)
         return recommendations.to_dict(orient='records')
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
